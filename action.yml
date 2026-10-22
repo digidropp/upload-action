@@ -1,0 +1,54 @@
+name: Digidropp Upload
+description: Upload an Android APK or iOS IPA to Digidropp and comment an install link with a QR code on the pull request.
+author: Digidropp
+branding:
+  icon: smartphone
+  color: purple
+
+inputs:
+  api-token:
+    description: Digidropp upload token (create one in Digidropp → Settings). Store it as a repository secret.
+    required: true
+  file:
+    description: Path or glob to the built .apk or .ipa, e.g. app/build/outputs/apk/release/*.apk. Must match exactly one file.
+    required: true
+  api-url:
+    description: Digidropp API base URL, ending in /api.
+    required: true
+  release-notes:
+    description: Notes shown to testers. Defaults to the pull request title, or the latest commit message on push.
+    required: false
+    default: ""
+  comment-on-pr:
+    description: Post (and keep updating) a comment with the install link and QR code on pull requests.
+    required: false
+    default: "true"
+  github-token:
+    description: Token used to comment on the pull request. Needs `pull-requests: write`.
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  install-url:
+    description: The app's install link (always the latest main build).
+    value: ${{ steps.upload.outputs.install-url }}
+  build-url:
+    description: Install link for exactly this build.
+    value: ${{ steps.upload.outputs.build-url }}
+  qr-url:
+    description: PNG QR code for this build's link.
+    value: ${{ steps.upload.outputs.qr-url }}
+
+runs:
+  using: composite
+  steps:
+    - id: upload
+      shell: bash
+      run: bash "${{ github.action_path }}/upload.sh"
+      env:
+        DD_API_TOKEN: ${{ inputs.api-token }}
+        DD_FILE: ${{ inputs.file }}
+        DD_API_URL: ${{ inputs.api-url }}
+        DD_RELEASE_NOTES: ${{ inputs.release-notes }}
+        DD_COMMENT: ${{ inputs.comment-on-pr }}
+        GH_TOKEN: ${{ inputs.github-token }}
