@@ -24,7 +24,7 @@ inputs:
     required: false
     default: "true"
   github-token:
-    description: Token used to comment on the pull request. Needs `pull-requests: write`.
+    description: "Token used to comment on the pull request. Needs the pull-requests: write permission."
     required: false
     default: ${{ github.token }}
 
